@@ -1,46 +1,72 @@
-# Getting Started with Create React App
+# Domain Driven Design : my pizza business example
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project intends to demonstrate how to model business logic behavior in DDD
 
-## Available Scripts
+## Business Rules
 
-In the project directory, you can run:
+### main activity
 
-### `yarn start`
+We PREPARE PIZZAS following our CUSTOMERS ORDERS BY PHONE and make them available to DELIVER through an external delivery service AS FAST AS POSSIBLE.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Process
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+AN ORDERED PIZZA by a CUSTOMER (with a NAME and a PHONE NUMBER) has a name and HANDLING STEPS such as PREPARATION and BAKING with TIME to achieve each of these HANDLING STEPS coming from a PIZZA RECIPE. We record the DATE/TIME of the CUSTOMER phone call ORDER.
 
-### `yarn test`
+We have some WORK STATIONS such as PREPARATION STATIONS and BAKING STATIONS. Each STATION is responsible of one HANDLING STEP and can HANDLE one or more PIZZAS at the same time. For example ou oven can bake 2 pizzas at the same time but a preparation station can only handle one pizza at a time.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+When a PIZZA ORDER is received it is put in the ORDERED PIZZAS LIST.
+Then the PREPARATION STATIONS persons, if they are not already working on a pizza, get an ORDERED PIZZA from the LIST and begin PREPARATION STEP.
+When the PREPARATION STEP is over, the PIZZA is put on a table WAITING FOR BAKING.
 
-### `yarn build`
+The BAKING STATION person get PIZZAS READY TO BE BAKED from the table and BAKE them in the OVEN, 2 at a time.
+As soon as a pizza is baked it is put on a stack READY TO BE DELIVERED.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Of course, the STATIONS persons always GET THE MOST OLD PIZZAS in order to DELIVER THE PIZZAS AS FAST AS POSSIBLE.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### Next step
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+In the future we want to MANAGE OUR INGREDIENTS STOCKS. Each PIZZA RECIPE has an INGREDIENTS LIST with NAME and QUANTITY.
+Each INGREDIENT has a QUANTITY IN STOCK which should be DECREASED EACH TIME WE PREPARE PIZZAS.
 
-### `yarn eject`
+## Domain
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Entities (domain objects which are unique and should be traced through their uniqueness)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Customer
+- Pizza
+- Pizza Recipe
+- Work Station
+- Ingredient (in the future)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Value Objects (domain objects which are not unique and would be useful only by their value)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+#### Value Object
 
-## Learn More
+- Name
+- Unique Id
+- Phone Number
+- Quantity
+- Picture URL
+- Unit (for Ingredient)
+- {Ingredient, Quantity} tuple
+- Handling Step
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  #### Value Object List
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Pizzas List
+- Handling Steps List
+- {Ingredient, Quantity} List
+
+### Use cases
+
+Here the use cases are included in their respective entities, mainly WorkStation.
+
+## Demo
+
+I have created a render loop with ticks (you will find the tick duration in globals.ts it is called DELTA_TIME, you can change it to accelarate our decelerate the simulation) as it is commonly done in video games but this time using ReactJS.
+
+so `yarn install` to install modules the first time and then `yarn start` to start the project.
+
+Click on _START_ button, some pizzas orders will be randomly created and you will see the automated process running.
+
+You can click click on _STOP_ to pause the simulation.
