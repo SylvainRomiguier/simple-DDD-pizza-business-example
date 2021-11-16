@@ -13,10 +13,11 @@ import {
 import { DELTA_TIME } from "./globals/globals";
 import { WorkStationUI } from "./UI/workStation/WorkStationUI";
 import { WaitingList } from "./UI/waitingList/WaitingList";
-import { Button } from "./UI/button/Button";
+import { Button } from "@chakra-ui/react";
 import { ButtonsBar } from "./UI/templates/ButtonsBar";
 import { WorkStations } from "./UI/templates/WorkStations";
 import { WaitingLists } from "./UI/templates/WaitingLists";
+import { CustomSlider } from "./UI/slider/CustomSlider";
 const pizzaReineHandlingSteps = new HandlingStepsList();
 pizzaReineHandlingSteps.addItem(new HandlingStep("Preparation", 5 * 60)); // time in seconds
 pizzaReineHandlingSteps.addItem(new HandlingStep("Baking", 10 * 60));
@@ -80,7 +81,7 @@ const getRandomPizza = () => {
 };
 
 const generateRandomOrder = () => {
-  switch (randomIntFromInterval(1, 5)) {
+  switch (randomIntFromInterval(1, 20)) {
     case 1:
       pizzasOrdered.addItem(
         new Pizza(getRandomCustomer(), getRandomPizza(), uuid(), new Date())
@@ -92,16 +93,18 @@ const generateRandomOrder = () => {
 };
 
 function App() {
-  const [render, setRender] = useState<{ status: LoopStatus; count: number }>({
+  const [render, setRender] = useState<{ status: LoopStatus; count: number, statusChangeOrigin: "Start" | "Button" | "TimeTickChange", deltaTime: number }>({
     status: "Idle",
     count: 0,
+    statusChangeOrigin: "Start",
+    deltaTime: DELTA_TIME
   });
 
   useEffect(() => {
     if (render.status === "Idle") return;
     if (render.status === "Start") {
       start();
-      setRender({ status: "Running", count: 1 });
+      setRender((prev) => ({...prev, status: "Running", count: 1 }));
       return;
     }
     if (render.status === "Running") {
@@ -109,25 +112,38 @@ function App() {
         generateRandomOrder();
         workStations.forEach((p) => p.work());
         setRender((prev) => ({ ...prev, count: prev.count + 1 }));
-      }, DELTA_TIME);
+      }, render.deltaTime);
     }
 
     if (render.status === "Stop") {
       clearInterval(limitedInterval);
+      if(render.statusChangeOrigin === "TimeTickChange") setRender((prev) => ({...prev, status: "Start", statusChangeOrigin: "Start"}))
     }
 
     return () => {
       clearInterval(limitedInterval);
     };
-  }, [render.status]);
+  }, [render.status, render.statusChangeOrigin, render.deltaTime]);
+
+  const onTimeTickChange = (value:number) => {
+    setRender({ ...render, status: "Stop",statusChangeOrigin: "TimeTickChange", deltaTime: value });
+  }
 
   return (
     <div className="App">
+      <CustomSlider
+        label={`Tick : 1s = ${render.deltaTime}ms`}
+        minValue={100}
+        maxValue={5000}
+        step={100}
+        value={render.deltaTime}
+        onChange={onTimeTickChange}
+      />
       <ButtonsBar>
-        <Button onClick={() => setRender({ ...render, status: "Start" })}>
+        <Button onClick={() => setRender({ ...render, status: "Start", statusChangeOrigin: "Button" })}>
           START
         </Button>
-        <Button onClick={() => setRender({ ...render, status: "Stop" })}>
+        <Button onClick={() => setRender({ ...render, status: "Stop", statusChangeOrigin: "Button" })}>
           STOP
         </Button>
       </ButtonsBar>

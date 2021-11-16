@@ -1,21 +1,15 @@
+import { Container } from "@chakra-ui/react";
 import { Pizza } from "../../domain/Pizza";
 
 const formatTime = (time: number): string => {
   const minutes = Math.trunc(time / 60);
   const secondsLeft = time - minutes * 60;
-  return `${minutes}:${secondsLeft}`;
+  return `${minutes}mn${secondsLeft}s`;
 };
 
 export const PizzaUI: React.FC<{ pizza: Pizza }> = ({ pizza }) => {
   return (
-    <div
-      style={{
-        margin: "5px",
-        padding: "5px",
-        border: "1px solid black",
-        borderRadius: "10px",
-      }}
-    >
+    <Container maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden" m="10px">
       <div>Customer : {pizza._customer._name.get()}</div>
       <div>{pizza._id.get()}</div>
       <div style={{ color: "green" }}>
@@ -37,6 +31,6 @@ export const PizzaUI: React.FC<{ pizza: Pizza }> = ({ pizza }) => {
           </div>
         ))}
       </div>
-    </div>
+    </Container>
   );
 };
